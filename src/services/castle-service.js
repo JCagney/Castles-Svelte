@@ -32,6 +32,31 @@ export class CastleService {
       }
     }
 
+    async rateCastle(castleid, rating){
+      try{
+        const response = await axios.get(this.baseUrl + "/api/castle/" + castleid +"/"+ rating)
+        return response
+      }catch (error) {
+        return error
+      }
+    }
+
+    async getCastleRating(castleid){
+      try{
+        const response = await axios.get(this.baseUrl + "/api/castle/" + castleid);
+        const ratings = await response.data.ratings;
+        let total = 0; 
+        for (var i = 0; i < ratings.length; i++){
+          total = total + parseInt(ratings[i]);
+        }
+        console.log(total);
+        let average = Math.round(total / ratings.length); 
+        return average; 
+      }catch (error) {
+        return 0;
+      }
+    }
+
     async deleteCastle(castleid) {
       try {
       const response = await axios.delete(this.baseUrl + "/api/castle/" + castleid)
@@ -110,4 +135,50 @@ export class CastleService {
         return false;
       }
     }
+
+    async editCastle(castleid, castle_name, castle_description, castle_coordinates, castle_category, castle_user){
+      try {
+
+        const edit = {
+          id: castleid,
+          name: castle_name,
+          description: castle_description,
+          coordinates: castle_coordinates,  
+          category: castle_category,
+          userid: castle_user
+        };
+        const response = await axios.post(`${this.baseUrl}/api/castle/edit`, edit);
+        console.log(response)
+        return response.status;
+      } catch (error) {
+        return false;
+      }
+    }
+
+
+
+    async getReviews(castleid){
+      try {
+        const response = await axios.get(this.baseUrl + "/api/reviews/castle/" + castleid);
+        const reviews = response.data; 
+        return reviews;
+        } catch (error) {
+          return [];
+        }
+    }
+
+    async postReview(reviewtext, userid, castleid){
+      try {
+        const review = {
+          text: reviewtext, 
+          author: userid, 
+          castle: castleid
+        }
+        const response = await axios.post(`${this.baseUrl}/api/review`, review);
+        return response.status;
+      } catch (error) {
+        return false;
+      }
+    }
+
   }

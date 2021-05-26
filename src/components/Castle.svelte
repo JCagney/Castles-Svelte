@@ -1,38 +1,64 @@
 <script >
     import { onMount, getContext } from "svelte";
     const castleService = getContext("CastleService");
-    import {user, castleid} from "../stores.js"
+    import 'leaflet/dist/leaflet.css';
+    import {LeafletMap} from '../services/leaflet-map';
+  
+  
     import { push } from "svelte-spa-router";
     
+    let castleid = JSON.parse(localStorage.castleid);
+    let userid = JSON.parse(localStorage.userid);
     let castle;
     let currentRating;
     let newRating = 8;
     let newReview = ""; 
     let reviews = [];
+    let lat; 
+    let long;
+    let map;
+
+
     async function addRating() {
-      console.log(newRating)
-      await castleService.rateCastle($castleid, newRating) 
-      currentRating = await castleService.getCastleRating($castleid)
+      // add a new rating and then update / refresh the Current Rating number
+      await castleService.rateCastle(castleid, newRating) 
+      currentRating = await castleService.getCastleRating(castleid)
     }
 
     onMount(async () => {
-      castle = await castleService.getCastle($castleid)
-      currentRating = await castleService.getCastleRating($castleid)
-      reviews = await castleService.getReviews($castleid)
-      console.log(reviews); 
+      castle = await castleService.getCastle(castleid)
+      currentRating = await castleService.getCastleRating(castleid)
+      reviews = await castleService.getReviews(castleid)
+
       console.log(castle.name)
+      lat = castle.coordinates.split(", ")[0];
+      long = castle.coordinates.split(", ")[1];
+     
+      const mapConfig = {
+        location: {lat: lat, lng: long},
+        zoom: 8,
+        minZoom: 7,
+      };
+      map = new LeafletMap("castle-map", mapConfig, 'Terrain');
+      map.addMarker({lat: lat, lng: long});
+      map.showZoomControl();
     })
 
+    
+
     async function deleteCastle() {
-      await castleService.deleteCastle($castleid);
+      await castleService.deleteCastle(castleid);
       push("/castles");
     }
 
     async function addReview() {
-      await castleService.postReview(newReview, $user._id,  $castleid);
-      reviews = await castleService.getReviews($castleid);
+      // add a new review and then update / refresh the reviews array
+      await castleService.postReview(newReview, userid,  castleid);
+      reviews = await castleService.getReviews(castleid);
       newReview = ""; 
     }
+
+  
 
 </script>
 
@@ -62,7 +88,7 @@
           <button class="submit uk-button uk-button-primary uk-button-small uk-width-1-1">Rate This Castle {newRating}/10</button>
         </form>
       </div>
-        <iframe src="https://maps.google.com/maps?q={castle.coordinates}&z=15&output=embed" title="location" width="380" height="290" frameborder="0" style="border:0"></iframe>
+        <div id="castle-map" class="ui embed" style="height:400px"></div>
       </div>     
     </div> 
     <div class="uk-margin">

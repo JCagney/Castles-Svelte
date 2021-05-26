@@ -1,8 +1,10 @@
 <script >
     import { onMount, getContext } from "svelte";
     const castleService = getContext("CastleService");
-    import {user, castleid} from "../stores.js"
     import { push } from "svelte-spa-router";
+
+    let castleid = JSON.parse(localStorage.castleid);
+    let userid = JSON.parse(localStorage.userid);
   
     let castle; 
     let categoryList = [];
@@ -14,13 +16,13 @@
   
   
     onMount(async () => {
-      castle = await castleService.getCastle($castleid)
+      castle = await castleService.getCastle(castleid)
       console.log(castle); 
       categoryList = await castleService.getCategories()
     });
   
     async function editCastle() {
-      const success = await castleService.editCastle($castleid, castle.name, castle.description, castle.coordinates, categoryList[selectedCategory]._id, $user._id)
+      const success = await castleService.editCastle(castleid, castle.name, castle.description, castle.coordinates, categoryList[selectedCategory]._id, userid)
       if (success) {
         push("/castles");
   

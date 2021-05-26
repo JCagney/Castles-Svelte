@@ -1,9 +1,9 @@
 <script >
   import { onMount, getContext } from "svelte";
   const castleService = getContext("CastleService");
-  import {user} from "../stores.js"
   import { push } from "svelte-spa-router";
-
+  
+  let userid = JSON.parse(localStorage.userid);
   let categoryList = [];
   let name = ""; 
   let description = ""; 
@@ -17,7 +17,7 @@
   });
 
   async function addCastle() {
-    const success = await castleService.addCastle(name, description, coordinates, categoryList[selectedCategory]._id, $user._id)
+    const success = await castleService.addCastle(name, description, coordinates, categoryList[selectedCategory]._id, userid)
     console.log(success)
     if (success) {
       push("/castles");

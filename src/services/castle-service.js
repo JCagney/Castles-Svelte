@@ -10,6 +10,10 @@ export class CastleService {
   
     constructor(baseUrl) {
       this.baseUrl = baseUrl;
+      if (localStorage.castletoken) {
+        axios.defaults.headers.common["Authorization"] = "Bearer " + JSON.parse(localStorage.castletoken);
+        //const user = this.getCurrentUser(); 
+      }
     }
   
     async getCastles() {
@@ -28,7 +32,7 @@ export class CastleService {
         this.castle = await response.data;
         return this.castle;
       } catch (error) {
-        return {};
+        return null;
       }
     }
 
@@ -41,6 +45,7 @@ export class CastleService {
       }
     }
 
+    //get array of ratings foor Castle and return the average rating 
     async getCastleRating(castleid){
       try{
         const response = await axios.get(this.baseUrl + "/api/castle/" + castleid);
@@ -49,7 +54,6 @@ export class CastleService {
         for (var i = 0; i < ratings.length; i++){
           total = total + parseInt(ratings[i]);
         }
-        console.log(total);
         let average = Math.round(total / ratings.length); 
         return average; 
       }catch (error) {
@@ -86,20 +90,55 @@ export class CastleService {
         }
     }
 
+    async getCurrentUser(){
+      const response = await axios.get(this.baseUrl + "/api/users/token/");
+      const user = response.data
+      return user;
+    }
+
+
     async login(email, password) {
       try {
         const response = await axios.post(`${this.baseUrl}/api/users/authenticate`, {email, password});
-        user.set(response.data);
-        return response.status == 200;
+        axios.defaults.headers.common["Authorization"] = "Bearer " + response.data.token;
+        if (response.data.success) {
+          // this method returns user info for a valid email address, the info is then added to the user store 
+          const checkresponse = await axios.get(this.baseUrl + "/api/users/checkemail/" + email);
+          const authuser = checkresponse.data;
+          user.set({
+            firstName: authuser.firstName,
+            lastName: authuser.lastName,
+            email: email,
+            _id: authuser._id,
+            token: response.data.token
+          });
+          localStorage.castletoken = JSON.stringify(response.data.token);
+          localStorage.userid = JSON.stringify(authuser._id);
+          return true;
+        }
+        return false;
       } catch (error) {
         return false;
       }
     }
 
+    async logout() {
+      user.set({
+        firstName: "",
+        lastName: "",
+        email: "",
+        _id: "",
+        token: ""
+      });
+      axios.defaults.headers.common["Authorization"] = "";
+      localStorage.castletoken = null;
+      localStorage.userid = null;
+    }
+
     async signup(newfirstName, newlastName, newemail, newpassword) {
      
      // check DB for email alreaady registered  
-     const response = await axios.post(`${this.baseUrl}/api/users/checkemail`, {newemail});
+     const response = await axios.get(this.baseUrl + "/api/users/checkemail/" + newemail);
      console.log(response); 
      if (response.status == 204){
        try{ 
@@ -113,8 +152,8 @@ export class CastleService {
         return response;
       } catch (error) {
         return false;
-      }
-    } 
+      } 
+     }
 
     }
 
@@ -159,6 +198,7 @@ export class CastleService {
 
     async getReviews(castleid){
       try {
+        //get all reviews with this castle id in them 
         const response = await axios.get(this.baseUrl + "/api/reviews/castle/" + castleid);
         const reviews = response.data; 
         return reviews;
@@ -180,5 +220,7 @@ export class CastleService {
         return false;
       }
     }
+
+    
 
   }

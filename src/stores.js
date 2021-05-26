@@ -51,8 +51,9 @@ export const user = writable({
   firstName: "",
   lastName: "",
   email: "",
-  password: "",
-  _id: ""
+  _id: "",
+  token: ""
+
 });
 
 export const castleid = writable("");

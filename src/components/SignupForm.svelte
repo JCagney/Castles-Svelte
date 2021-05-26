@@ -11,7 +11,6 @@
     let errorMessage = "";
   
     async function signup() {
-      console.log(firstName, lastName, email, password);
       let success = await castleService.signup(firstName, lastName, email, password);
       if (success) {
         push("/login");

@@ -32,7 +32,7 @@
           {#each castleList as castle}
           <tr>
             <td> 
-              <a on:click={() => castleid.set(castle._id)} href="/#/castleview" class="uk-card uk-card-small uk-card-hover uk-padding-small">
+              <a on:click={() => localStorage.castleid = JSON.stringify(castle._id)} href="/#/castleview" class="uk-card uk-card-small uk-card-hover uk-padding-small">
                 <i class="fas fa-chess-rook" title="Enter {castle.name}" uk-tooltip></i>
               </a>
             </td>

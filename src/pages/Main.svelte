@@ -1,6 +1,7 @@
 <script>
     import {title, subTitle, navBar, welcomeBar, user} from "../stores"
     import clare from "/src/assets/clare-island.jpg";
+    import axios from "axios";
     title.set("Caisleáin na hÉireann");
     subTitle.set("Sign up or Log in");
 
@@ -8,9 +9,12 @@
       firstName: "",
       lastName: "",
       email: "",
-      password: "",
-      _id: ""
+      _id: "",
+      token: ""
     });
+    axios.defaults.headers.common["Authorization"] = "";
+    localStorage.castletoken = null;
+    localStorage.userid = null;
   
     navBar.set({
       bar: welcomeBar
